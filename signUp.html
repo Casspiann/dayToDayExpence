@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+    <title>User SignUp</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div style="margin-left: 35%; margin-right: 35%; margin-top: 10%; background-color: black ">
+        <form>
+            <fieldset>
+                <br>
+                <label style="color: red;" for="name">Name:</label><br>
+                <input  style="width: 80%;" type="text" required id="name" name="name" ><br><br>
+                <label style="color: red;" for="email">Email:</label><br>
+                <input   style="width: 80%;" type="email" required id="email" name="email"><br><br>
+                <label style="color: red;" for="pass">Password:</label><br>
+                <input  style="width: 80%;" type="text" required id="pass" name="pass" ><br><br>
+                <button type="submit" style="color: red; background-color: yellow; border-radius: 20px; margin-left: 40%; " name="submit" id="submit">Sign Up</button>
+            </fieldset>
+
+        </form>
+    </div>
+</body>
+<script>
+    var item = document.getElementById("submit");
+    item.addEventListener('click',"details");
+
+    function details(){
+        
+       let Name = document.getElementById('name').value;
+       let Email = document.getElementById('email').value;
+       let Password = document.getElementById('password').value;
+       const obj = {
+        Name,Email,Password
+    }
+    axios.post("http://localhost:3000/users/signup",obj,{headers: {
+        'Content-Type': 'application/json'
+      }})
+    }
+</script>
+</html>
