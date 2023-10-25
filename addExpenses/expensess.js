@@ -1,5 +1,8 @@
 var item = document.getElementById("Submit");
 var itemList = document.getElementById('items');
+let currentPage = 1;
+const expensesPerPage = 10;
+let totalPages;
 
 
 function parseJwt(token) {
@@ -68,13 +71,15 @@ function addlist() {
 
     axios.get("http://localhost:4000/expenses/get-expenses", {headers:{'Authorization':token}})
         .then((response) => {
-            console.log(response.data.allExpense);
+          const allExpenses = response.data.allExpense;
+            console.log(allExpenses);
 
             if (response.data && Array.isArray(response.data.allExpense)) {
-                for (var i = 0; i < response.data.allExpense.length; i++) {
-                    createListItem(response.data.allExpense[i]);
-                    console.log(response.data.allExpense[i]);
-                }
+                // Update the UI to display only the expenses for the current page
+                  displayExpensesForPage(currentPage, allExpenses);
+
+                 // Update pagination buttons
+                  updatePaginationUI(currentPage, allExpenses);
             } else {
                 console.error('Data is not in the expected format:', response.data);
             }
@@ -82,7 +87,53 @@ function addlist() {
         .catch(error => {
             console.error('Error:', error);
         });
+    }
+function displayExpensesForPage(page, allExpenses) {
+  const startIndex = (page - 1) * expensesPerPage;
+  const endIndex = startIndex + expensesPerPage;
+  const expensesToDisplay = allExpenses.slice(startIndex, endIndex);
+
+  // Clear the previous list of expenses
+  document.getElementById('items').innerHTML = '';
+
+  for (let i = 0; i < expensesToDisplay.length; i++) {
+    createListItem(expensesToDisplay[i]);
+  }
 }
+function updatePaginationUI(currentPage, allExpenses) {
+  totalPages = Math.ceil(allExpenses.length / expensesPerPage);
+
+  // Update the current page display
+  document.getElementById('currentPage').textContent = `Page ${currentPage} of ${totalPages}`;
+
+  // Enable or disable "Next" and "Previous" buttons based on the current page
+  document.getElementById('previousPage').disabled = currentPage === 1;
+  document.getElementById('nextPage').disabled = currentPage === totalPages;
+   // Event listener for the "Next" button
+   document.getElementById('nextPage').addEventListener('click', () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      displayExpensesForPage(currentPage, allExpenses);
+      updatePaginationUI(currentPage, allExpenses);
+    }
+  });
+  
+// Event listener for the "Previous" button
+document.getElementById('previousPage').addEventListener('click', () => {
+  if (currentPage > 1) {
+    currentPage--;
+    displayExpensesForPage(currentPage, allExpenses);
+    updatePaginationUI(currentPage, allExpenses);
+  }
+});
+
+
+
+}
+
+
+
+
 
 item.addEventListener('click', addExpense);
 
@@ -231,15 +282,19 @@ document.getElementById("rzp-button1").onclick = async function(e) {
     }
   };
   function download(){
-    axios.get('http://localhost:3000/user/download', { headers: {"Authorization" : token} })
+    const token = localStorage.getItem('token');
+   // console.log(token);
+    axios.get('http://localhost:4000/expenses/download', { headers: {"Authorization" : token} })
     .then((response) => {
         if(response.status === 201){
             //the bcakend is essentially sending a download link
             //  which if we open in browser, the file would download
+            console.log(response);
             var a = document.createElement("a");
             a.href = response.data.fileUrl;
             a.download = 'myexpense.csv';
             a.click();
+          console.log("Hello");
         } else {
             throw new Error(response.data.message)
         }
@@ -250,19 +305,5 @@ document.getElementById("rzp-button1").onclick = async function(e) {
     });
 
   }
-  document.getElementById('downloadexpense').addEventListener('click',function (){
-    const token = localStorage.getItem('token');
-    const decodedToken = parseJwt(token);
-  //alert("hello"+decodedToken);
-   const isPremiumMember = decodedToken.ispremiumuser;
-   console.log("isPremiumMember:", isPremiumMember);
-   if (isPremiumMember) {
-    download();
-   }else{
-    alert("You are not premium user");
-   }
-
-
-  })
 
 
