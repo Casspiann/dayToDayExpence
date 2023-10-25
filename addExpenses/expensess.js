@@ -1,8 +1,20 @@
 var item = document.getElementById("Submit");
 var itemList = document.getElementById('items');
 let currentPage = 1;
-const expensesPerPage = 10;
+//let expensesPerPage = 10;
 let totalPages;
+let allExpenses = [];
+//let expensesPerPage = Number(document.getElementById('rowsper').value);
+//console.log(expensesPerPage);
+let expensesPerPage = Number(localStorage.getItem('expensesPerPage'));
+
+// If 'expensesPerPage' is not set in localStorage, set it to the default value (10)
+if (expensesPerPage === null) {
+    expensesPerPage = 10;
+}
+//console.log(typeof(expensesPerPage));
+
+
 
 
 function parseJwt(token) {
@@ -66,12 +78,9 @@ function addlist() {
   if (isPremiumMember) {
     showPremiumUserMessage();
   }
-
-   
-
     axios.get("http://localhost:4000/expenses/get-expenses", {headers:{'Authorization':token}})
         .then((response) => {
-          const allExpenses = response.data.allExpense;
+           allExpenses = response.data.allExpense;
             console.log(allExpenses);
 
             if (response.data && Array.isArray(response.data.allExpense)) {
@@ -88,10 +97,22 @@ function addlist() {
             console.error('Error:', error);
         });
     }
+    document.getElementById('updatePerPage').addEventListener('click', () => {
+      const perPageInput = document.getElementById('expensePerPageInput');
+      const expensesPerPage = parseInt(perPageInput.value, 10);
+    
+    // Store the preference in local storage
+      localStorage.setItem('expensesPerPage', expensesPerPage);
+    
+    // Update the UI to display the new number of expenses
+      displayExpensesForPage(currentPage, allExpenses);
+      updatePaginationUI(currentPage, allExpenses);
+        });
 function displayExpensesForPage(page, allExpenses) {
   const startIndex = (page - 1) * expensesPerPage;
   const endIndex = startIndex + expensesPerPage;
   const expensesToDisplay = allExpenses.slice(startIndex, endIndex);
+  console.log(expensesToDisplay);
 
   // Clear the previous list of expenses
   document.getElementById('items').innerHTML = '';
@@ -109,10 +130,12 @@ function updatePaginationUI(currentPage, allExpenses) {
   // Enable or disable "Next" and "Previous" buttons based on the current page
   document.getElementById('previousPage').disabled = currentPage === 1;
   document.getElementById('nextPage').disabled = currentPage === totalPages;
+}
    // Event listener for the "Next" button
    document.getElementById('nextPage').addEventListener('click', () => {
     if (currentPage < totalPages) {
       currentPage++;
+     // console.log(currentPage+",,,");
       displayExpensesForPage(currentPage, allExpenses);
       updatePaginationUI(currentPage, allExpenses);
     }
@@ -122,6 +145,7 @@ function updatePaginationUI(currentPage, allExpenses) {
 document.getElementById('previousPage').addEventListener('click', () => {
   if (currentPage > 1) {
     currentPage--;
+   // console.log(currentPage+"....");
     displayExpensesForPage(currentPage, allExpenses);
     updatePaginationUI(currentPage, allExpenses);
   }
@@ -129,7 +153,7 @@ document.getElementById('previousPage').addEventListener('click', () => {
 
 
 
-}
+
 
 
 
